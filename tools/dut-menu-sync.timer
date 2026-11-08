@@ -1,0 +1,11 @@
+[Unit]
+Description=Check school menu changes every two minutes
+
+[Timer]
+OnBootSec=90s
+OnUnitInactiveSec=120s
+AccuracySec=5s
+Unit=dut-menu-sync.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=DUT Panjin school menu synchronization
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/srv/vivian-model-home
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/dut-menu-sync/sync_menu.py --root /srv/vivian-model-home/食堂 --state /var/lib/dut-menu-sync/state.json --token-file /etc/dut-menu-sync/token --status-file /srv/vivian-model-home/食堂/同步状态.md --owner 1000:1000
+TimeoutStartSec=180
