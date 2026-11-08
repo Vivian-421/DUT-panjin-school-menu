@@ -181,19 +181,6 @@ class Sync:
         return kind
 
     def run(self, initialize=False):
-        head = self.github.head()
-        if head == self.state.get("head"):
-            remote = self.state["remote"]
-        else:
-            remote = self.github.files(head)
-        local = self.local_files()
-        if not self.state:
-            if not initialize or local != remote:
-                raise RuntimeError("首次启动须显式初始化，且公开菜单与远端一致")
-            self.state = {"head": head, "base_head": head, "base": remote, "remote": remote}
-            self.save()
-            return self.status("synced")
-
         pending = self.state.get("pending")
         if pending:
             if not pending.get("number"):
@@ -204,6 +191,20 @@ class Sync:
                 pull = self.github.request("GET", "/pulls/" + str(pending["number"]))
             if pull["state"] == "open":
                 return self.status("waiting", pending["url"])
+        head = self.github.head()
+        if head == self.state.get("head"):
+            remote = self.state["remote"]
+        else:
+            remote = self.github.files(head)
+        local = self.local_files()
+        if "base" not in self.state:
+            if not initialize or local != remote:
+                raise RuntimeError("首次启动须显式初始化，且公开菜单与远端一致")
+            self.state = {"head": head, "base_head": head, "base": remote, "remote": remote}
+            self.save()
+            return self.status("synced")
+
+        if pending:
             adopted = {
                 name: remote[name] if local[name] == pending["local"][name] else local[name]
                 for name in MENU_PATHS
